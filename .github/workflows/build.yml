@@ -42,8 +42,6 @@ jobs:
         mkdir "${build_directory}"
         
         for target in "${targets[@]}"; do
-            declare install_prefix="${build_directory}/${target}"
-            
             echo "- Building for ${target}"
             
             source "${toolchains_directory}/${target}.sh"
