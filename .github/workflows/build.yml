@@ -1,0 +1,123 @@
+name: Build
+
+on:
+  push:
+    branches:
+        - '**'
+
+jobs:
+  build:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+      with:
+        submodules: true
+    - name: Setup OBGGCC cross-compiler
+      run: |
+        declare -r OBGGCC_TAG="$(jq --raw-output '.tag_name' <<< "$(curl --connect-timeout '10' --retry '15' --retry-all-errors --fail --silent --url 'https://api.github.com/repos/AmanoTeam/obggcc/releases/latest')")"
+        declare -r OBGGCC_TARBALL='/tmp/toolchain.tar.xz'
+        declare -r OBGGCC_URL="https://github.com/AmanoTeam/obggcc/releases/download/${OBGGCC_TAG}/x86_64-unknown-linux-gnu.tar.xz"
+        
+        curl --connect-timeout '10' --retry '15' --retry-all-errors --fail --silent --location --url "${OBGGCC_URL}" --output "${OBGGCC_TARBALL}"
+        tar --directory="$(dirname "${OBGGCC_TARBALL}")" --extract --file="${OBGGCC_TARBALL}"
+        
+        echo 'OBGGCC_HOME=/tmp/obggcc' >> "${GITHUB_ENV}"
+        echo '/tmp/obggcc/bin' >> "${GITHUB_PATH}"
+    - name: Build with CMake
+      run: |
+        declare -ra targets=(
+            x86_64-unknown-linux-gnu
+        )
+        
+        declare -r toolchains_directory="${PWD}/toolchains"
+        declare -r source_directory="${PWD}/submodules/wine"
+        declare -r output_directory="$(realpath './output')"
+        
+        mkdir --parent "${output_directory}"
+        
+        for target in "${targets[@]}"; do
+            declare build_directory="${target}-build"
+            declare install_prefix="${build_directory}/${target}"
+            
+            echo "- Building for ${target}"
+            
+            source "${toolchains_directory}/${target}.sh"
+            
+            pushd "${build_directory}"
+            
+			${source_directory}/configure \
+				--host="${CROSS_COMPILE_TRIPLET}" \
+				--prefix="${install_prefix}" \
+				--enable-win64 \
+				--without-alsa \
+				--without-capi \
+				--without-coreaudio \
+				--without-cups \
+				--without-dbus \
+				--without-fontconfig \
+				--without-freetype \
+				--without-gphoto \
+				--without-gnutls \
+				--without-gstreamer \
+				--without-opencl \
+				--without-opengl \
+				--without-osmesa \
+				--without-oss \
+				--without-sane \
+				--without-xcomposite \
+				--without-xcursor \
+				--without-xinerama \
+				--without-xinput \
+				--without-xinput2 \
+				--without-xrandr \
+				--without-xrender \
+				--without-xshape \
+				--without-xshm \
+				--without-xxf86vm \
+				--without-pcap \
+				--without-wayland \
+				--without-usb \
+				--without-v4l2 \
+				--without-pulse \
+				--without-ffmpeg \
+				--without-udev \
+				--without-sdl \
+				--without-netapi \
+				--without-vulkan \
+				--disable-tests
+            
+            make --jobs=60
+            make install
+            
+			echo "- Creating compressed archive"
+			
+			pushd "$(dirname "${install_prefix}")"
+			             
+			tar --create --file=- "${target}" |  xz --extreme --threads='0' --compress -9 > "${output_directory}/${target}.tar.xz"
+			
+            rm --force --recursive "${build_directory}"
+        done
+    - name: Upload artifact
+      uses: actions/upload-artifact@main
+      with:
+        path: ./output
+    - name: Get tag name for release
+      if: startsWith(github.event.head_commit.message, 'Bump version')
+      run: echo "VERSION_TAG=${COMMIT_MESSAGE/* }" >> "${GITHUB_ENV}"
+      env:
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+    - name: Create release
+      if: startsWith(github.event.head_commit.message, 'Bump version')
+      uses: softprops/action-gh-release@master
+      with:
+        tag_name: v${{ env.VERSION_TAG }}
+        name: Wine v${{ env.VERSION_TAG }}
+        files: ./output/*
+        draft: true
+        prerelease: false
+        fail_on_unmatched_files: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
