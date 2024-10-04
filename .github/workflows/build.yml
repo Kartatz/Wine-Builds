@@ -29,7 +29,10 @@ jobs:
     - name: Build with CMake
       run: |
         declare -ra targets=(
-            x86_64-unknown-linux-gnu
+            'x86_64-unknown-linux-gnu'
+            'arm-unknown-linux-gnueabihf'
+            'aarch64-unknown-linux-gnu'
+            'i386-unknown-linux-gnu'
         )
         
         declare -r build_directory='/tmp/wine-build'
@@ -90,7 +93,7 @@ jobs:
                 --without-x \
                 --disable-tests
             
-            make --jobs=60
+            make --jobs='80'
             make install
             
             echo "- Creating compressed archive"
