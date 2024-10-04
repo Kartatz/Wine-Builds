@@ -32,17 +32,17 @@ jobs:
             x86_64-unknown-linux-gnu
         )
         
+        declare -r build_directory='/tmp/wine-build'
+        declare -r install_prefix='/tmp/wine'
         declare -r toolchains_directory="${PWD}/toolchains"
         declare -r source_directory="${PWD}/submodules/wine"
-        declare -r output_directory="$(realpath './output')"
+		declare -r output_directory="$(realpath './output')"
         
-        mkdir --parent "${output_directory}"
+        mkdir "${output_directory}"
+        mkdir "${build_directory}"
         
         for target in "${targets[@]}"; do
-            declare build_directory="${target}-build"
             declare install_prefix="${build_directory}/${target}"
-            
-            mkdir --parent "${install_prefix}"
             
             echo "- Building for ${target}"
             
@@ -52,7 +52,7 @@ jobs:
             
             ${source_directory}/configure \
                 --host="${CROSS_COMPILE_TRIPLET}" \
-                --prefix="$(realpath "${install_prefix}")" \
+                --prefix="${install_prefix}" \
                 --enable-win64 \
                 --without-alsa \
                 --without-capi \
@@ -99,9 +99,10 @@ jobs:
             
             pushd "$(dirname "${install_prefix}")"
                          
-            tar --create --file=- "${target}" |  xz --extreme --threads='0' --compress -9 > "${output_directory}/${target}.tar.xz"
+            tar --create --file=- "$(basename "${install_prefix}")" |  xz --extreme --threads='0' --compress -9 > "${output_directory}/${target}.tar.xz"
             
-            rm --force --recursive "${build_directory}"
+            rm --force --recursive "${build_directory}/"*
+            rm --force --recursive "${install_prefix}/"*
         done
     - name: Upload artifact
       uses: actions/upload-artifact@main
