@@ -48,56 +48,56 @@ jobs:
             
             pushd "${build_directory}"
             
-			${source_directory}/configure \
-				--host="${CROSS_COMPILE_TRIPLET}" \
-				--prefix="${install_prefix}" \
-				--enable-win64 \
-				--without-alsa \
-				--without-capi \
-				--without-coreaudio \
-				--without-cups \
-				--without-dbus \
-				--without-fontconfig \
-				--without-freetype \
-				--without-gphoto \
-				--without-gnutls \
-				--without-gstreamer \
-				--without-opencl \
-				--without-opengl \
-				--without-osmesa \
-				--without-oss \
-				--without-sane \
-				--without-xcomposite \
-				--without-xcursor \
-				--without-xinerama \
-				--without-xinput \
-				--without-xinput2 \
-				--without-xrandr \
-				--without-xrender \
-				--without-xshape \
-				--without-xshm \
-				--without-xxf86vm \
-				--without-pcap \
-				--without-wayland \
-				--without-usb \
-				--without-v4l2 \
-				--without-pulse \
-				--without-ffmpeg \
-				--without-udev \
-				--without-sdl \
-				--without-netapi \
-				--without-vulkan \
-				--disable-tests
+            ${source_directory}/configure \
+                --host="${CROSS_COMPILE_TRIPLET}" \
+                --prefix="${install_prefix}" \
+                --enable-win64 \
+                --without-alsa \
+                --without-capi \
+                --without-coreaudio \
+                --without-cups \
+                --without-dbus \
+                --without-fontconfig \
+                --without-freetype \
+                --without-gphoto \
+                --without-gnutls \
+                --without-gstreamer \
+                --without-opencl \
+                --without-opengl \
+                --without-osmesa \
+                --without-oss \
+                --without-sane \
+                --without-xcomposite \
+                --without-xcursor \
+                --without-xinerama \
+                --without-xinput \
+                --without-xinput2 \
+                --without-xrandr \
+                --without-xrender \
+                --without-xshape \
+                --without-xshm \
+                --without-xxf86vm \
+                --without-pcap \
+                --without-wayland \
+                --without-usb \
+                --without-v4l2 \
+                --without-pulse \
+                --without-ffmpeg \
+                --without-udev \
+                --without-sdl \
+                --without-netapi \
+                --without-vulkan \
+                --disable-tests
             
             make --jobs=60
             make install
             
-			echo "- Creating compressed archive"
-			
-			pushd "$(dirname "${install_prefix}")"
-			             
-			tar --create --file=- "${target}" |  xz --extreme --threads='0' --compress -9 > "${output_directory}/${target}.tar.xz"
-			
+            echo "- Creating compressed archive"
+            
+            pushd "$(dirname "${install_prefix}")"
+                         
+            tar --create --file=- "${target}" |  xz --extreme --threads='0' --compress -9 > "${output_directory}/${target}.tar.xz"
+            
             rm --force --recursive "${build_directory}"
         done
     - name: Upload artifact
