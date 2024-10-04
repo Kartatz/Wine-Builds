@@ -42,6 +42,8 @@ jobs:
             declare build_directory="${target}-build"
             declare install_prefix="${build_directory}/${target}"
             
+            mkdir --parent "${build_directory}"
+            
             echo "- Building for ${target}"
             
             source "${toolchains_directory}/${target}.sh"
