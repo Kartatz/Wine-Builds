@@ -52,7 +52,7 @@ jobs:
             
             ${source_directory}/configure \
                 --host="${CROSS_COMPILE_TRIPLET}" \
-                --prefix="${install_prefix}" \
+                --prefix="$(realpath "${install_prefix}")" \
                 --enable-win64 \
                 --without-alsa \
                 --without-capi \
