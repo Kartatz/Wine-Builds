@@ -42,7 +42,6 @@ jobs:
             declare build_directory="${target}-build"
             declare install_prefix="${build_directory}/${target}"
             
-            mkdir --parent "${build_directory}"
             mkdir --parent "${install_prefix}"
             
             echo "- Building for ${target}"
