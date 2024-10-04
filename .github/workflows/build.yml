@@ -35,6 +35,7 @@ jobs:
             'x86_64-unknown-linux-gnu'
         )
         sudo apt install wine64
+        whereis wine64 || where wine64
         
         declare -r build_directory='/tmp/wine-build'
         declare -r install_prefix='/tmp/wine'
