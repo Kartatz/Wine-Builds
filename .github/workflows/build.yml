@@ -89,6 +89,7 @@ jobs:
                 --without-sdl \
                 --without-netapi \
                 --without-vulkan \
+                --without-x \
                 --disable-tests
             
             make --jobs=60
