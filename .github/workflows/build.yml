@@ -36,7 +36,7 @@ jobs:
         declare -r install_prefix='/tmp/wine'
         declare -r toolchains_directory="${PWD}/toolchains"
         declare -r source_directory="${PWD}/submodules/wine"
-		declare -r output_directory="$(realpath './output')"
+        declare -r output_directory="$(realpath './output')"
         
         mkdir "${output_directory}"
         mkdir "${build_directory}"
