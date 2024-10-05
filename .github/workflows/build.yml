@@ -91,8 +91,8 @@ jobs:
                 --without-netapi \
                 --without-vulkan \
                 --without-x \
-                --disable-tests \
-                --with-wine-tools='/usr/bin'
+                --disable-tests
+            
             ls */*
             make --jobs='80'
             make install
