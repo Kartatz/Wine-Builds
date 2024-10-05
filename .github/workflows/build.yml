@@ -96,7 +96,7 @@ jobs:
             ls */*
             make --jobs='80'
             make install
-            
+            ls tools/*
             echo "- Creating compressed archive"
             
             pushd "$(dirname "${install_prefix}")"
